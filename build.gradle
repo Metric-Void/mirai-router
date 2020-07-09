@@ -1,0 +1,29 @@
+plugins {
+    id 'java'
+}
+
+group 'com.metricv'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+def miraiCoreVersion = "1.0.3"
+
+repositories {
+    mavenCentral()
+    jcenter()
+    maven {
+        url "https://dl.bintray.com/kotlin/kotlin-eap"
+    }
+    maven {
+        url "https://mirrors.huaweicloud.com/repository/maven"
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    implementation "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+    implementation "com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4" // don"t use any other.
+
+    implementation "net.mamoe:mirai-core:$miraiCoreVersion"
+    implementation "net.mamoe:mirai-core-qqandroid:$miraiCoreVersion"
+}
