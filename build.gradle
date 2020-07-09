@@ -27,3 +27,10 @@ dependencies {
     implementation "net.mamoe:mirai-core:$miraiCoreVersion"
     implementation "net.mamoe:mirai-core-qqandroid:$miraiCoreVersion"
 }
+
+test {
+    useJUnit()
+
+    maxParallelForks 8
+    ignoreFailures true
+}

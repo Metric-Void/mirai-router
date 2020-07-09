@@ -4,6 +4,7 @@ import com.metricv.mirai.matcher.MatchOptions;
 import com.metricv.mirai.matcher.RegexMatcher;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.EnumSet;
