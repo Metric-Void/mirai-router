@@ -84,4 +84,29 @@ public class Routing {
         // Routing has ended. All route match.
         target.accept(result);
     }
+
+    /**
+     * Attach a matcher that matches the next new message.
+     * The previous matcher will be forcifully set to "DISPOSE".
+     * @param nextMatcher The next matcher. Construct one yourself.
+     * @return
+     */
+    public Routing thenMatch(Matcher nextMatcher) {
+        MatcherConfig mc = new MatcherConfig();
+        mc.matcher = nextMatcher;
+        mc.name = null;
+        mc.opts = nextMatcher.getCurrentOpts();
+
+        if(matcherChain.size() != 0) {
+            matcherChain.get(matcherChain.size()-1).opts.remove(MatchOptions.RETAIN);
+            matcherChain.get(matcherChain.size()-1).opts.add(MatchOptions.DISPOSE);
+        }
+        matcherChain.add(mc);
+        return this;
+    }
+
+    public Routing setTarget(Consumer<RoutingResult> target) {
+        this.target = target;
+        return this;
+    }
 }

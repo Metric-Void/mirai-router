@@ -79,6 +79,19 @@ public class RegexMatcher implements Matcher {
         this.opt = opt;
     }
 
+    public EnumSet<MatchOptions> getDefaultOpts() {
+        return EnumSet.of(
+                MatchOptions.MATCH_ALL,
+                MatchOptions.SEEK_ADJ,
+                MatchOptions.DISPOSE,
+                MatchOptions.CATCH_MATC
+        );
+    }
+
+    public EnumSet<MatchOptions> getCurrentOpts() {
+        return this.opt;
+    }
+
     @Override
     public boolean isMatch(final SingleMessage msg) {
         if (msg instanceof PlainText && pattern != null) {

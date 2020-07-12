@@ -2,6 +2,7 @@ package com.metricv.mirai.matcher;
 
 import net.mamoe.mirai.message.data.SingleMessage;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,4 +38,16 @@ public interface Matcher {
      * @return Object matched. Optional.Empty if no match.
      */
     public Optional<Object> seekMatch(List<SingleMessage> msgChain);
+
+    /**
+     * Get the default options for this specific matcher.
+     * @return An EnumSet of options.
+     */
+    public EnumSet<MatchOptions> getDefaultOpts();
+
+    /**
+     * Get current options for this specific matcher.
+     * @return An EnumSet of options.
+     */
+    public EnumSet<MatchOptions> getCurrentOpts();
 }
