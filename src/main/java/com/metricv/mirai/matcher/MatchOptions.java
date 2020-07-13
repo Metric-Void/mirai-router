@@ -18,7 +18,7 @@ public enum MatchOptions {
     RETAIN,     // Retain this message element after matching. It will be matched again by the next matcher.
 
     CATCH_ALL,  // Return all contents in this SingleMessage.
-    CATCH_MATC, // Returns only the matching part.
+    CATCH_PART, // Returns only a part of the message element. Different matchers have different specification of "part".
     CATCH_NONE, // Match but do not catch the content. Result will be ignored.
     ;
 
@@ -28,6 +28,6 @@ public enum MatchOptions {
             MatchOptions.SEEK_ADJ,
             MatchOptions.MATCH_PART,
             MatchOptions.DISPOSE,
-            MatchOptions.CATCH_MATC
+            MatchOptions.CATCH_PART
     );
 }

@@ -4,7 +4,6 @@ import com.metricv.mirai.matcher.MatchOptions;
 import com.metricv.mirai.matcher.RegexMatcher;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageChainBuilder;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.EnumSet;
@@ -23,10 +22,10 @@ public class RegexMatcherTest {
         MessageChain mc = mcb.asMessageChain();
 
         RegexMatcher testee = new RegexMatcher("This (?<what>.+)");
-        assertTrue(testee.isMatch(mc.get(0)));
+        assertTrue(testee.isMatch(null, mc.get(0)));
         System.out.println("Single message match OK.");
 
-        Optional<Object> result = testee.getMatch(mc.get(0));
+        Optional<Object> result = testee.getMatch(null, mc.get(0));
         assertTrue(result.isPresent());
         assertTrue(result.get() instanceof Matcher);
 
@@ -45,13 +44,13 @@ public class RegexMatcherTest {
                 MatchOptions.MATCH_PART,
                 MatchOptions.SEEK_ADJ,
                 MatchOptions.DISPOSE,
-                MatchOptions.CATCH_MATC
+                MatchOptions.CATCH_PART
         ));
 
-        assertTrue(testee.isMatch(mc.get(0)));
+        assertTrue(testee.isMatch(null, mc.get(0)));
         System.out.println("Partial existence match OK.");
 
-        Optional<Object> result = testee.getMatch(mc.get(0));
+        Optional<Object> result = testee.getMatch(null, mc.get(0));
         assertTrue(result.isPresent());
         assertTrue(result.get() instanceof Matcher);
 

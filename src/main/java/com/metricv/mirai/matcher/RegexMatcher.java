@@ -1,9 +1,11 @@
 package com.metricv.mirai.matcher;
 
+import com.metricv.mirai.router.RoutingContext;
 import net.mamoe.mirai.message.data.PlainText;
 import net.mamoe.mirai.message.data.SingleMessage;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -39,7 +41,7 @@ public class RegexMatcher implements Matcher {
                 MatchOptions.MATCH_ALL,
                 MatchOptions.SEEK_ADJ,
                 MatchOptions.DISPOSE,
-                MatchOptions.CATCH_MATC
+                MatchOptions.CATCH_PART
         );
     }
 
@@ -84,7 +86,7 @@ public class RegexMatcher implements Matcher {
                 MatchOptions.MATCH_ALL,
                 MatchOptions.SEEK_ADJ,
                 MatchOptions.DISPOSE,
-                MatchOptions.CATCH_MATC
+                MatchOptions.CATCH_PART
         );
     }
 
@@ -93,7 +95,7 @@ public class RegexMatcher implements Matcher {
     }
 
     @Override
-    public boolean isMatch(final SingleMessage msg) {
+    public boolean isMatch(@Nullable RoutingContext context, final SingleMessage msg) {
         if (msg instanceof PlainText && pattern != null) {
             String content = ((PlainText) msg).getContent();
             return pattern.matcher(content).matches();
@@ -103,7 +105,7 @@ public class RegexMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Object> getMatch(final SingleMessage msg) {
+    public Optional<Object> getMatch(@Nullable RoutingContext context, final SingleMessage msg) {
         if(!(msg instanceof PlainText)) return Optional.empty();
         String content = ((PlainText) msg).getContent();
         java.util.regex.Matcher matcher = pattern.matcher(content);
@@ -133,7 +135,7 @@ public class RegexMatcher implements Matcher {
     }
 
     @Override
-    public Optional<Object> seekMatch(@NotNull List<SingleMessage> msgChain) {
+    public Optional<Object> seekMatch(@Nullable RoutingContext context, @NotNull List<SingleMessage> msgChain) {
         int index_matched = -1;
 
         for (int index=0; index<msgChain.size(); index += 1) {
@@ -152,7 +154,7 @@ public class RegexMatcher implements Matcher {
                 msgChain.subList(0, index_matched).clear();
             }
 
-            Optional<Object> result = getMatch(msgChain.get(0));
+            Optional<Object> result = getMatch(context, msgChain.get(0));
 
             // See if we are asked to retain the matched part, or truncate it.
             if(!opt.contains(MatchOptions.RETAIN)) {

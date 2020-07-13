@@ -1,5 +1,6 @@
 package com.metricv.mirai.matcher;
 
+import com.metricv.mirai.router.RoutingContext;
 import net.mamoe.mirai.message.data.At;
 import net.mamoe.mirai.message.data.AtAll;
 import net.mamoe.mirai.message.data.SingleMessage;
@@ -23,12 +24,12 @@ public class AtMatcher implements Matcher{
      * qqid=0 means @all.
      * @param qqid
      */
-    AtMatcher(long qqid) {
+    public AtMatcher(long qqid) {
         this.qqid = qqid;
     }
 
     @Override
-    public boolean isMatch(SingleMessage msg) {
+    public boolean isMatch(RoutingContext context, SingleMessage msg) {
         if(msg instanceof At) {
             return qqid == -1 || ((At) msg).getTarget() == qqid;
         } else if (msg instanceof AtAll) {
@@ -38,7 +39,7 @@ public class AtMatcher implements Matcher{
     }
 
     @Override
-    public Optional<Object> getMatch(SingleMessage msg) {
+    public Optional<Object> getMatch(RoutingContext context, SingleMessage msg) {
         if(msg instanceof At) {
             if (qqid == -1 || ((At) msg).getTarget() == qqid)
                 return Optional.of(((At) msg).getTarget());
@@ -54,7 +55,7 @@ public class AtMatcher implements Matcher{
     }
 
     @Override
-    public Optional<Object> seekMatch(List<SingleMessage> msgChain) {
+    public Optional<Object> seekMatch(RoutingContext context, List<SingleMessage> msgChain) {
         return Optional.empty();
     }
 
@@ -64,7 +65,7 @@ public class AtMatcher implements Matcher{
                 MatchOptions.MATCH_ALL,
                 MatchOptions.SEEK_ADJ,
                 MatchOptions.DISPOSE,
-                MatchOptions.CATCH_MATC
+                MatchOptions.CATCH_PART
         );
     }
 
@@ -74,7 +75,7 @@ public class AtMatcher implements Matcher{
                 MatchOptions.MATCH_ALL,
                 MatchOptions.SEEK_ADJ,
                 MatchOptions.DISPOSE,
-                MatchOptions.CATCH_MATC
+                MatchOptions.CATCH_PART
         );
     }
 }

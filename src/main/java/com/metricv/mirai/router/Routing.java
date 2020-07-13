@@ -2,9 +2,11 @@ package com.metricv.mirai.router;
 
 import com.metricv.mirai.matcher.MatchOptions;
 import com.metricv.mirai.matcher.Matcher;
+import net.mamoe.mirai.message.MessageEvent;
 import net.mamoe.mirai.message.data.MessageChain;
 import net.mamoe.mirai.message.data.MessageSource;
 import net.mamoe.mirai.message.data.SingleMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -14,21 +16,24 @@ import java.util.function.Consumer;
 
 public class Routing {
 
+    /**
+     * The configuration of a matcher, in a chain of matchers from a routing.
+     */
     static class MatcherConfig {
         String name;
         Matcher matcher;
         EnumSet<MatchOptions> opts;
     }
 
-    private ArrayList<MatcherConfig> matcherChain;
-    private boolean matchParallel;
-    private Consumer<RoutingResult> target;
+    protected ArrayList<MatcherConfig> matcherChain;
+    protected boolean matchParallel;
+    protected Consumer<RoutingResult> target;
 
-    private Routing() {
+    protected Routing() {
         matcherChain = new ArrayList<>();
     }
 
-    private Routing(boolean isParallel) {
+    protected Routing(boolean isParallel) {
         this();
         matchParallel = isParallel;
     }
@@ -41,14 +46,40 @@ public class Routing {
         return new Routing(false);
     }
 
-    public void startRouting(MessageChain incomingMessage) {
-        List<SingleMessage> contentList = incomingMessage;
-        RoutingResult result = new RoutingResult();
+    /**
+     * Put a customized parameter into this routing.
+     * Routing will become {@link ParameterizedRouting} . Original Routing is not affected.
+     * Parameters will appear in RoutingResult.
+     * @param name Name of the parameter
+     * @param param Value.
+     * @return self, but in the form of a {@link ParameterizedRouting}.
+     */
+    public ParameterizedRouting putParam(String name, Object param) {
+        ParameterizedRouting pr = new ParameterizedRouting(this);
+        pr.putParam(name, param);
+        return pr;
+    }
+
+    /**
+     * Accept and process an event.
+     * @param event {@link MessageEvent} from mirai.
+     */
+    public void startRouting(@NotNull MessageEvent event) {
+        RoutingResult initialResult = new RoutingResult();
+        initialResult.eventSource = event;
+        startRouting(event, initialResult);
+    }
+
+    protected void startRouting(@NotNull MessageEvent event, RoutingResult initialResult) {
+        MessageChain incomingMessage = event.getMessage();
+        List<SingleMessage> contentList = new ArrayList<>(incomingMessage);
+
+        RoutingContext context = new RoutingContext(event);
 
         // Isolate MessageSource.
         if(incomingMessage.first(MessageSource.Key) != null) {
-            result.msgSource = incomingMessage.first(MessageSource.Key);
-            contentList.remove(result.msgSource);
+            initialResult.msgSource = incomingMessage.first(MessageSource.Key);
+            contentList.remove(initialResult.msgSource);
         }
 
         // Start matching
@@ -58,16 +89,16 @@ public class Routing {
             MatcherConfig curr = matcherChain.get(index);
             if(curr.opts.contains(MatchOptions.SEEK_NEXT)) {
                 while(index < matcherChain.size()) {
-                    if (curr.matcher.isMatch(contentList.get(index))) {
-                        matchResult = curr.matcher.getMatch(contentList.get(index));
+                    if (curr.matcher.isMatch(context, contentList.get(index))) {
+                        matchResult = curr.matcher.getMatch(context, contentList.get(index));
                         break;
                     }
                     index += 1;
                 }
                 if(matchResult.isEmpty()) return;
             } else {
-                if(curr.matcher.isMatch(contentList.get(index))) {
-                    matchResult = curr.matcher.getMatch(contentList.get(index));
+                if(curr.matcher.isMatch(context, contentList.get(index))) {
+                    matchResult = curr.matcher.getMatch(context, contentList.get(index));
                 } else {
                     return;
                 }
@@ -75,21 +106,21 @@ public class Routing {
 
             if(!curr.opts.contains(MatchOptions.CATCH_NONE)) {
                 if(curr.name != null) {
-                    result.put(curr.name, matchResult);
+                    initialResult.put(curr.name, matchResult);
                 } else {
-                    result.insertNonNamed(matchResult);
+                    initialResult.insertNonNamed(matchResult);
                 }
             }
         }
         // Routing has ended. All route match.
-        target.accept(result);
+        target.accept(initialResult);
     }
 
     /**
      * Attach a matcher that matches the next new message.
      * The previous matcher will be forcifully set to "DISPOSE".
      * @param nextMatcher The next matcher. Construct one yourself.
-     * @return
+     * @return self
      */
     public Routing thenMatch(Matcher nextMatcher) {
         MatcherConfig mc = new MatcherConfig();
@@ -105,6 +136,11 @@ public class Routing {
         return this;
     }
 
+    /**
+     * Set a functional interface to this message.
+     * @param target A {@link Consumer} accepting a {@link RoutingResult}.
+     * @return self
+     */
     public Routing setTarget(Consumer<RoutingResult> target) {
         this.target = target;
         return this;
